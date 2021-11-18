@@ -101,6 +101,59 @@ public class ArchivoRemitentes {
         }
 
     }
+
+    public RegistroR buscar(String nombre) throws IOException {
+        RegistroR buscado = null;
+
+        try {
+            this.aLectura = new Scanner(this.archivo);
+            while (this.aLectura.hasNext()) {
+                RegistroR r = this.leerRegistroR(this.aLectura.nextLine().split(";"));
+                if (r.getNombre().equals(nombre)) {
+                    buscado = r;
+                    break;
+                }
+            }
+            return buscado;
+        } catch (FileNotFoundException ex) {
+            throw new IOException("No fue posible abrir el archivo para leer");
+        } finally {
+            if (this.aLectura != null) {
+                this.aLectura.close();
+            }
+        }
+    }
+
+    public RegistroR eliminar(String nombre) throws IOException { // 123
+
+        RegistroR eliminado = null;
+        List<RegistroR> listadoGoleadores = this.leer();
+        ArchivoRemitentes archivoTmp = new ArchivoRemitentes("ListadoGoleadoresTmp.dat");
+        for (RegistroR r : listadoGoleadores) {
+            if (r.getNombre().equals(nombre)) {
+                eliminado = r;
+            } else {
+                archivoTmp.escribir(r);
+            }
+        }
+
+        if (!archivoTmp.archivo.exists()) {
+            archivoTmp.archivo.createNewFile();
+        }
+
+        if (this.archivo.delete()) {
+            if (archivoTmp.archivo.renameTo(this.archivo)) {
+                return eliminado;
+            } else {
+                throw new IOException("El archivo temporal no fue renombrado");
+            }
+
+        } else {
+            throw new IOException("El archivo original no fue eliminado");
+        }
+
+    }
+
     public boolean escribir(RegistroR r) {
 
         PrintWriter escritor = null;
